@@ -23,6 +23,7 @@ async function verifyFileAccess(fileId) {
     console.log('File Name:', file.data.name);
     console.log('File ID:', file.data.id);
     console.log('Current Owners:', file.data.owners.map(owner => owner.emailAddress));
+    console.log(file.data.pendingOwner)
     return true;
   } catch (error) {
     console.error('File access error:', error.message);
@@ -36,7 +37,7 @@ async function verifyFileAccess(fileId) {
   }
 }
 
-async function transferOwnershipBetweenEmails(fileId, currentOwnerEmail, newOwnerEmail) {
+async function transferOwnershipBetweenEmails(fileId, currentOwnerEmail, newOwnerEmail, pendingOwner) {
   try {
     // First verify file access
     const hasAccess = await verifyFileAccess(fileId);
@@ -67,21 +68,45 @@ async function transferOwnershipBetweenEmails(fileId, currentOwnerEmail, newOwne
     });
 
     // Then, transfer ownership
-    await drive.permissions.update({
+    await drive.permissions.create({
       fileId: fileId,
       permissionId: currentOwner.permissionId,
       requestBody: {
         role: 'owner',
+        transferOwnership: true,
         type: 'user',
         emailAddress: newOwnerEmail,
       },
-      fields: 'id',
+      fields: 'id, emailAddress, role',
       transferOwnership: true,
     });
+
+
+    // await drive.pendingOwnershipChanges.create({
+    //   fileId: fileId,
+    //   requestedOwnerEmailAddress: newOwnerEmail,
+    //   fields: 'id',
+    // });
+
+    // await drive.pendingActions.update({
+    //   fileId: fileId,
+    //   removeExpiration: true,
+    //   fields: 'id',
+    //   requestBody: {
+    //     removeExpiration: true,
+    //   },
+    //   pendingOwner: newOwnerEmail,
+    //   transferOwnership: true
+    // });
+
+    console.log(newOwnerDetails);
+    console.log('Sending ownership transfer email to the new owner...');
+    console.log('Ownership transfer initiated...');
 
     console.log(`Successfully transferred ownership from ${currentOwnerEmail} to ${newOwnerEmail}`);
   } catch (error) {
     console.error('Error transferring ownership:', error.message);
+    // console.log('permissions, pendingActions, transferOwnership');
     throw error;
   }
 }
