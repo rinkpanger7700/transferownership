@@ -1,0 +1,13 @@
+{
+  "name": "google-drive-ownership-transfer",
+  "version": "1.0.0",
+  "description": "Automation tool for transferring Google Drive file ownership",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "googleapis": "^128.0.0"
+  }
+}
